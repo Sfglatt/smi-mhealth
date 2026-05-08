@@ -1,0 +1,445 @@
+---
+title: "01_data"
+author: "Sglatt"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Github
+```{r git, eval=FALSE}
+usethis::create_from_github("https://github.com/Sfglatt/smi-mhealth",
+  destdir = "~/Github/smi-mhealth"
+)
+```
+
+# Packages
+```{r packages}
+if (!require("readxl")) {
+  install.packages("readxl")
+  require("readxl")
+}
+if (!require("dplyr")) {
+  install.packages("dplyr")
+  require("dplyr")
+}
+if (!require("stringr")) {
+  install.packages("stringr")
+  require("stringr")
+}
+if (!require("lubridate")) {
+  install.packages("lubridate")
+  require("lubridate")
+}
+```
+
+# Folders for output 
+```{r output folders, eval=FALSE}
+if (!dir.exists("01_output")) {
+  dir.create("01_output")
+}
+
+if (!dir.exists("01_output/Individual_merged")) {
+  dir.create("01_output/Individual_merged")
+}
+
+if (!dir.exists("01_output/All_merged")) {
+  dir.create("01_output/All_merged")
+}
+```
+
+# Convert all raw files to csv
+```{r file conversion, eval=FALSE}
+# Get all .xlsx files
+xlsx_files <- list.files(
+  path = "Raw_data",
+  pattern = "\\.xlsx$",
+  full.names = TRUE
+)
+
+xlsx_files
+
+# Loop through files
+for (file in xlsx_files) {
+  df <- read_excel(file)
+
+  csv_file <- file.path(
+    "Raw_data",
+    paste0(tools::file_path_sans_ext(basename(file)), ".csv")
+  )
+
+  # Save CSV
+  write.csv(df, csv_file, row.names = FALSE)
+}
+```
+
+# Import all csvs
+```{r csvs}
+csv_files <- list.files(
+  path = "Raw_data",
+  pattern = "\\.csv$",
+  full.names = TRUE
+)
+
+for (file in csv_files) {
+  obj_name <- tools::file_path_sans_ext(basename(file))
+  df <- read.csv(file, stringsAsFactors = FALSE)
+  assign(obj_name, df)
+}
+
+# Rename the file ALEXIS_004_Frist to ALEXIS_004_First
+if (exists("ALEXIS_004_Frist")) {
+  assign("ALEXIS_004_First", get("ALEXIS_004_Frist"))
+  rm("ALEXIS_004_Frist")
+}
+```
+
+# Verify that all first, mid, and last surveys have the same column names across participants before looping
+```{r protocol}
+# First
+setdiff(colnames(ALEXIS_001_First), colnames(ALEXIS_002_First))
+setdiff(colnames(ALEXIS_002_First), colnames(ALEXIS_001_First))
+
+setdiff(colnames(ALEXIS_001_First), colnames(ALEXIS_004_First))
+setdiff(colnames(ALEXIS_004_First), colnames(ALEXIS_001_First))
+
+setdiff(colnames(ALEXIS_001_First), colnames(ALEXIS_005_First))
+setdiff(colnames(ALEXIS_005_First), colnames(ALEXIS_001_First))
+
+setdiff(colnames(ALEXIS_001_First), colnames(ALEXIS_006_First))
+setdiff(colnames(ALEXIS_006_First), colnames(ALEXIS_001_First))
+
+setdiff(colnames(ALEXIS_001_First), colnames(ALEXIS_007_First))
+setdiff(colnames(ALEXIS_007_First), colnames(ALEXIS_001_First))
+
+setdiff(colnames(ALEXIS_001_First), colnames(ALEXIS_008_First))
+setdiff(colnames(ALEXIS_008_First), colnames(ALEXIS_001_First))
+
+setdiff(colnames(ALEXIS_001_First), colnames(ALEXIS_009_First))
+setdiff(colnames(ALEXIS_009_First), colnames(ALEXIS_001_First))
+
+# Mid
+setdiff(colnames(ALEXIS_001_Mid), colnames(ALEXIS_002_Mid))
+setdiff(colnames(ALEXIS_002_Mid), colnames(ALEXIS_001_Mid))
+
+setdiff(colnames(ALEXIS_001_Mid), colnames(ALEXIS_004_Mid))
+setdiff(colnames(ALEXIS_004_Mid), colnames(ALEXIS_001_Mid))
+
+setdiff(colnames(ALEXIS_001_Mid), colnames(ALEXIS_005_Mid))
+setdiff(colnames(ALEXIS_005_Mid), colnames(ALEXIS_001_Mid))
+
+setdiff(colnames(ALEXIS_001_Mid), colnames(ALEXIS_006_Mid))
+setdiff(colnames(ALEXIS_006_Mid), colnames(ALEXIS_001_Mid))
+
+setdiff(colnames(ALEXIS_001_Mid), colnames(ALEXIS_007_Mid))
+setdiff(colnames(ALEXIS_007_Mid), colnames(ALEXIS_001_Mid))
+
+setdiff(colnames(ALEXIS_001_Mid), colnames(ALEXIS_008_Mid))
+setdiff(colnames(ALEXIS_008_Mid), colnames(ALEXIS_001_Mid))
+
+setdiff(colnames(ALEXIS_001_Mid), colnames(ALEXIS_009_Mid))
+setdiff(colnames(ALEXIS_009_Mid), colnames(ALEXIS_001_Mid))
+
+# Last
+setdiff(colnames(ALEXIS_001_Last), colnames(ALEXIS_002_Last))
+setdiff(colnames(ALEXIS_002_Last), colnames(ALEXIS_001_Last))
+
+setdiff(colnames(ALEXIS_001_Last), colnames(ALEXIS_004_Last))
+setdiff(colnames(ALEXIS_004_Last), colnames(ALEXIS_001_Last))
+
+setdiff(colnames(ALEXIS_001_Last), colnames(ALEXIS_005_Last))
+setdiff(colnames(ALEXIS_005_Last), colnames(ALEXIS_001_Last))
+
+setdiff(colnames(ALEXIS_001_Last), colnames(ALEXIS_006_Last))
+setdiff(colnames(ALEXIS_006_Last), colnames(ALEXIS_001_Last))
+
+setdiff(colnames(ALEXIS_001_Last), colnames(ALEXIS_007_Last))
+setdiff(colnames(ALEXIS_007_Last), colnames(ALEXIS_001_Last))
+
+setdiff(colnames(ALEXIS_001_Last), colnames(ALEXIS_008_Last))
+setdiff(colnames(ALEXIS_008_Last), colnames(ALEXIS_001_Last))
+
+setdiff(colnames(ALEXIS_001_Last), colnames(ALEXIS_009_Last))
+setdiff(colnames(ALEXIS_009_Last), colnames(ALEXIS_001_Last))
+# Good
+```
+
+# Check structure/overlap columns between first/mid/last surveys for one participant
+# Then loop the process for the rest of the participants
+```{r structure}
+colnames(ALEXIS_001_First)
+colnames(ALEXIS_001_Mid)
+colnames(ALEXIS_001_Last)
+
+# Convert date to POSIXct
+ALEXIS_001_First$global_date <- as.POSIXct(
+  ALEXIS_001_First$global_date,
+  tz = "UTC"
+)
+
+ALEXIS_001_Mid$global_date <- as.POSIXct(
+  ALEXIS_001_Mid$global_date,
+  tz = "UTC"
+)
+
+ALEXIS_001_Last$global_date <- as.POSIXct(
+  ALEXIS_001_Last$global_date,
+  tz = "UTC"
+)
+
+# Add a wave label
+ALEXIS_001_First$wave <- "first"
+ALEXIS_001_Mid$wave <- "mid"
+ALEXIS_001_Last$wave <- "last"
+
+ALEXIS_001_First$source_dataset <- paste0("ALEXIS_001_First")
+ALEXIS_001_Mid$source_dataset <- paste0("ALEXIS_001_Mid")
+ALEXIS_001_Last$source_dataset <- paste0("ALEXIS_001_Last")
+
+
+ALEXIS_001_combined <- bind_rows(
+  ALEXIS_001_First,
+  ALEXIS_001_Mid,
+  ALEXIS_001_Last
+) %>%
+  arrange(subject_id, global_date)
+
+# Sort chronologically
+ALEXIS_001_combined <- ALEXIS_001_combined %>%
+  arrange(global_date) %>%
+  select(subject_id, wave, source_dataset, global_date, everything())
+
+# Check for duplicate timestamp and instance key
+ALEXIS_001_combined %>%
+  count(subject_id, timestamp) %>%
+  filter(n > 1) %>%
+  arrange(desc(n))
+
+ALEXIS_001_combined %>%
+  count(subject_id, instance_key) %>%
+  filter(n > 1) %>%
+  arrange(desc(n))
+
+any(duplicated(names(ALEXIS_001_combined)))
+```
+
+# Merge surveys into one file per person
+```{r}
+ids <- sprintf("ALEXIS_%03d", c(2, 4:9))
+ids
+
+for (id in ids) {
+  first_obj <- get(paste0(id, "_First"))
+  mid_obj <- get(paste0(id, "_Mid"))
+  last_obj <- get(paste0(id, "_Last"))
+
+  # Add wave identifier
+  first_obj$wave <- "first"
+  mid_obj$wave <- "mid"
+  last_obj$wave <- "last"
+
+  first_obj$source_dataset <- paste0(id, "_First")
+  mid_obj$source_dataset <- paste0(id, "_Mid")
+  last_obj$source_dataset <- paste0(id, "_Last")
+
+  # Convert dates
+  first_obj$global_date <- as.POSIXct(first_obj$global_date, tz = "UTC")
+  mid_obj$global_date <- as.POSIXct(mid_obj$global_date, tz = "UTC")
+  last_obj$global_date <- as.POSIXct(last_obj$global_date, tz = "UTC")
+
+  # Combine
+  combined <- bind_rows(first_obj, mid_obj, last_obj) %>%
+    arrange(subject_id, global_date, source_dataset, wave, instance_key)
+
+  print(
+    combined %>%
+      count(subject_id, timestamp) %>%
+      filter(n > 1)
+  )
+
+  print(
+    combined %>%
+      count(subject_id, instance_key) %>%
+      filter(n > 1)
+  )
+
+  # Save back into global environment
+  assign(paste0(id, "_combined"), combined)
+}
+```
+
+# Save the individual combined files
+```{r save individual combined}
+ids <- sprintf("ALEXIS_%03d", c(1:2, 4:9))
+ids
+
+for (id in ids) {
+  obj_name <- paste0(id, "_combined")
+
+  if (exists(obj_name)) {
+    df <- get(obj_name)
+
+    write.csv(
+      df,
+      file.path(
+        "01_output/Individual_merged",
+        paste0(id, "_sg_", format(Sys.Date(), "%Y-%m-%d"), ".csv")
+      ),
+      row.names = FALSE
+    )
+  }
+}
+```
+
+# Merge all individual combined files together for one master file
+```{r merge all}
+# Make sure all combined files are the same
+list(
+  only_in_001 = setdiff(names(ALEXIS_001_combined), names(ALEXIS_002_combined)),
+  only_in_002 = setdiff(names(ALEXIS_002_combined), names(ALEXIS_001_combined))
+)
+
+# 002
+list(
+  "ALEXIS_002_only_in_001" = setdiff(names(ALEXIS_001_combined), names(ALEXIS_002_combined)),
+  "ALEXIS_002_only_in_002" = setdiff(names(ALEXIS_002_combined), names(ALEXIS_001_combined))
+)
+
+# 004
+list(
+  "ALEXIS_004_only_in_001" = setdiff(names(ALEXIS_001_combined), names(ALEXIS_004_combined)),
+  "ALEXIS_004_only_in_004" = setdiff(names(ALEXIS_004_combined), names(ALEXIS_001_combined))
+)
+
+# 005
+list(
+  "ALEXIS_005_only_in_001" = setdiff(names(ALEXIS_001_combined), names(ALEXIS_005_combined)),
+  "ALEXIS_005_only_in_005" = setdiff(names(ALEXIS_005_combined), names(ALEXIS_001_combined))
+)
+
+# 006
+list(
+  "ALEXIS_006_only_in_001" = setdiff(names(ALEXIS_001_combined), names(ALEXIS_006_combined)),
+  "ALEXIS_006_only_in_006" = setdiff(names(ALEXIS_006_combined), names(ALEXIS_001_combined))
+)
+
+# 007
+list(
+  "ALEXIS_007_only_in_001" = setdiff(names(ALEXIS_001_combined), names(ALEXIS_007_combined)),
+  "ALEXIS_007_only_in_007" = setdiff(names(ALEXIS_007_combined), names(ALEXIS_001_combined))
+)
+
+# 008
+list(
+  "ALEXIS_008_only_in_001" = setdiff(names(ALEXIS_001_combined), names(ALEXIS_008_combined)),
+  "ALEXIS_008_only_in_008" = setdiff(names(ALEXIS_008_combined), names(ALEXIS_001_combined))
+)
+
+# 009
+list(
+  "ALEXIS_009_only_in_001" = setdiff(names(ALEXIS_001_combined), names(ALEXIS_009_combined)),
+  "ALEXIS_009_only_in_009" = setdiff(names(ALEXIS_009_combined), names(ALEXIS_001_combined))
+)
+
+identical(
+  names(ALEXIS_001_combined),
+  names(ALEXIS_002_combined)
+)
+
+# Merge all
+ALEXIS_all_combined <- bind_rows(
+  ALEXIS_001_combined,
+  ALEXIS_002_combined,
+  ALEXIS_004_combined,
+  ALEXIS_005_combined,
+  ALEXIS_006_combined,
+  ALEXIS_007_combined,
+  ALEXIS_008_combined,
+  ALEXIS_009_combined
+) %>%
+  arrange(subject_id, global_date)
+
+# Check for duplicate timestamp and instance key within subject id
+ALEXIS_all_combined %>%
+  count(subject_id, timestamp, wave, instance_key) %>%
+  filter(n > 1) %>%
+  arrange(desc(n))
+
+ALEXIS_all_combined %>%
+  filter(subject_id == 67334) %>%
+  arrange(timestamp) %>%
+  select(subject_id, timestamp, instance_key, source_dataset, wave)
+
+# ALEXIS_007 and ALEXIS_008 have the *same* subject ID, timestamp, and instance key for some observatios
+# Look at subject IDs in 007 and 008
+table(ALEXIS_007_combined$subject_id)
+table(ALEXIS_008_combined$subject_id)
+
+# The error is with 007
+# look at their individual surveys to see if the subject ID is consistent across all three waves
+table(ALEXIS_007_Mid$subject_id) # Consistent
+table(ALEXIS_007_Last$subject_id) # Consistent
+table(ALEXIS_007_First$subject_id) # Not consistent - 67334 (the same as 008) in first, but 67333 in mid and last
+
+# Check if they are duplicates
+head(ALEXIS_007_First)
+head(ALEXIS_008_First)
+
+# Re-merge without 007 for now
+# Merge all
+ALEXIS_all_combined_x007 <- bind_rows(
+  ALEXIS_001_combined,
+  ALEXIS_002_combined,
+  ALEXIS_004_combined,
+  ALEXIS_005_combined,
+  ALEXIS_006_combined,
+  ALEXIS_008_combined,
+  ALEXIS_009_combined
+) %>%
+  arrange(subject_id, global_date)
+
+# Check for duplicate timestamp and instance key within subject id
+ALEXIS_all_combined_x007 %>%
+  count(subject_id, timestamp, wave, instance_key) %>%
+  filter(n > 1) %>%
+  arrange(desc(n))
+# Good
+```
+
+# Filter to just the EMA surveys (mid)
+```{r filter mid}
+ALEXIS_all_mid_x007 <- ALEXIS_all_combined_x007 %>% 
+  filter(wave == "mid") %>%
+  arrange(subject_id, global_date)
+```
+
+# Add a day and beep variable
+```{r da/beep vars}
+ALEXIS_all_mid_x007 <- ALEXIS_all_mid_x007 %>%
+  group_by(subject_id) %>%
+  arrange(global_date, .by_group = TRUE) %>%
+  mutate(
+    day = as.integer(as.Date(global_date) - as.Date(min(global_date))) + 1,
+    beep = row_number()
+  ) %>%
+  ungroup()
+```
+
+# Save the combined (without 007 for now) files
+```{r save combined}
+# First/mid/last combined
+write.csv(ALEXIS_all_combined_x007,
+  file = paste0("01_output/All_merged/ALEXIS_all_merged_sg_", format(Sys.Date(), "%Y-%m-%d"), ".csv"),
+  row.names = TRUE
+)
+
+# The mid EMA surveys with day/beep
+write.csv(ALEXIS_all_mid_x007,
+  file = paste0("01_output/All_merged/ALEXIS_mid_merged_sg_", format(Sys.Date(), "%Y-%m-%d"), ".csv"),
+  row.names = TRUE
+)
+```
+
